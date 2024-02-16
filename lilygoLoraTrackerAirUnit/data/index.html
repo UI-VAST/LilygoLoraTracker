@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>VAST Ground Station</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <div class="topnav">
+            <h1>VAST Ground Station</h1>
+        </div>
+        <div class="content">
+            <div class="card-grid">
+                <div class="card">
+                    <p class="card-title">latitude:</p>
+                    <p id="lat">0.000</p>
+                </div>
+                <div class="card">
+                    <p class="card-title">longitude:</p>
+                    <p id="lon">0.000</p>
+                </div>
+                <div class="card">
+                    <p class="card-title">altitude:</p>
+                    <p id="alt">0.000</p>
+                </div>
+                <div class="card">
+                    <p class="card-title">rssi:</p>
+                    <p id="rssi">0.000</p>
+                </div>
+                <div class="card">
+                    <button onclick="sendCutDown()">Send CutDown</button>
+                </div>
+
+            </div>
+            
+        </div>
+        <canvas id="rssiChart" width="200" height="100"></canvas>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</html>
