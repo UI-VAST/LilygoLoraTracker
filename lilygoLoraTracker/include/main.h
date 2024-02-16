@@ -30,6 +30,7 @@ struct packet{
   float lat;
   float lon;
   float alt;
+  uint8_t sats;
   uint8_t pcount;
   uint8_t state;
   

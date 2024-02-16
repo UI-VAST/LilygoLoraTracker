@@ -7,6 +7,7 @@ window.addEventListener('load', onload);
 
 function onload(event) {
     initWebSocket();
+    initMap();
 }
 
 function sendCutDown(){
@@ -44,8 +45,10 @@ function onMessage(event) {
 
     //console.log(myObj["rssi"]);
     
-    //addData(rssiChart, dataIndex, parseInt(myObj["rssi"]));
-    //removeOldData(rssiChart);
+    addData(rssiChart, dataIndex, parseInt(myObj["rssi"]));
+    removeOldData(rssiChart);
+
+    updateMarker(parseFloat(myObj["lat"]), parseFloat(myObj["lng"]));
 }
 
 
@@ -104,5 +107,32 @@ function removeOldData(chart) {
     }
 }
 
+var marker;
+// Initialize and display the map
+function initMap() {
+    // Specify the coordinates
+    var myLatLng = {lat: 40.7128, lng: -74.0060};
+
+    // Create a map object and specify the DOM element for display.
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: myLatLng,
+        zoom: 8
+    });
+
+    // Create a marker and set its position.
+    var marker = new google.maps.Marker({
+        map: map,
+        position: myLatLng,
+        title: 'Marker'
+    });
 
 
+
+}
+
+// Function to update marker position
+function updateMarker(lat, lng) {
+    var newLatLng = new google.maps.LatLng(lat, lng);
+    marker.setPosition(newLatLng);
+    map.setCenter(newLatLng);
+}

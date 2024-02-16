@@ -28,11 +28,11 @@
 
 struct packet{
   float lat;
-  float lon;
+  float lng;
   float alt;
+  uint8_t sats;
   uint8_t pcount;
   uint8_t state;
-  
 };
 
 
@@ -41,6 +41,6 @@ void Send_packet();
 void Recieve_packet(int len);
 void init_lora();
 void init_oled();
-void update_clients(packet* p);
 void slow_loop();
 void fast_loop();
+void read_gps();

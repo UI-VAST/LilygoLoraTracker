@@ -28,14 +28,31 @@
                     <p id="rssi">0.000</p>
                 </div>
                 <div class="card">
+                    <p class="card-title">snr:</p>
+                    <p id="snr">0.000</p>
+                </div>
+                <div class="card">
+                    <p class="card-title">sats:</p>
+                    <p id="sats">0.000</p>
+                </div>
+                <div class="card">
+                    <p class="card-title">packet count:</p>
+                    <p id="pcount">0.000</p>
+                </div>
+                <div class="card">
                     <button onclick="sendCutDown()">Send CutDown</button>
                 </div>
 
             </div>
-            
+        
+            <canvas id="rssiChart" width="200" height="100"></canvas>
         </div>
-        <canvas id="rssiChart" width="200" height="100"></canvas>
+        <div id="map"></div>
+        
     </body>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkFiqXNX4pO0JBLPDIkvl0gW-Jwe3420A&callback=initMap">
+    </script>
 </html>

@@ -21,11 +21,11 @@ body {
     max-width: 800px;
     margin: 0 auto;
     display: grid;
-    grid-gap: 2rem;
+    grid-gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 .card {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
 }
 .card-title {
@@ -36,4 +36,20 @@ body {
 .reading {
     font-size: 1.2rem;
     color: #1282A2;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+  
+tr:nth-child(even) {
+    background-color: #dddddd;
 }

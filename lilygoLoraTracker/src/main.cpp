@@ -8,8 +8,8 @@
 #include <websocket.h>
 
 long lastSendTime = 0;
-int count = 100;        // last send time
-#define interval 100    // interval between sends
+int count = 1000;        // last send time
+#define interval 1000    // interval between sends
 
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
@@ -22,8 +22,8 @@ uint8_t badPacket = 0;
 packet RXp;
 packet TXp;
 
-uint8_t spreadFactor = 8;
-uint8_t txPower = 14;
+#define spreadFactor 8
+#define txPower 19
 
 void setup() {
   Serial.begin(115200);             
@@ -37,9 +37,6 @@ void setup() {
   init_server();
   init_oled();
   
-  TXp.lat = 23.324234;
-  TXp.lon = 43.42564;
-  TXp.alt = 23432;
   TXp.pcount = 0;
   TXp.state = 0x00;
   update_clients(&TXp);
@@ -131,10 +128,13 @@ void init_oled(){
 }
 
 void update_clients(packet* p){
-  data["lat"] = String(p->lat);
-  data["lon"] =  String(p->lon);
+  data["lat"] = String(p->lat, 8);
+  data["lon"] =  String(p->lon, 8);
   data["alt"] = String(p->alt);
-  data["rssi"] = String(LoRa.rssi());
+  data["sats"] = String(p->sats);
+  data["pcount"] = String(p->pcount);
+  data["rssi"] = String(LoRa.packetRssi());
+  data["snr"] = String(LoRa.packetSnr());
   
   serializeJson(data, jsonString);
   notifyClients(jsonString);
@@ -142,7 +142,7 @@ void update_clients(packet* p){
 
 //1sec
 void slow_loop(){
-    update_clients(&TXp);
+    update_clients(&RXp);
 
     TXp.pcount++;
 
@@ -162,10 +162,6 @@ void slow_loop(){
 
 void fast_loop(){
   Recieve_packet(LoRa.parsePacket());
-  int timer = millis();
-  notifyClients(jsonString);
-  Serial.print("TX time: ");
-  Serial.println(millis()-timer);
 }
 
 

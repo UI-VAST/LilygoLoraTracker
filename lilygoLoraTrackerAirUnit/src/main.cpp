@@ -5,28 +5,31 @@
 #include <Adafruit_SSD1306.h>         
 #include <LoRa.h>
 #include <main.h>
-#include <websocket.h>
+#include <TinyGPSPlus.h>
+#include <HardwareSerial.h>
 
 long lastSendTime = 0;
-int count = 100;        // last send time
-#define interval 100    // interval between sends
+int count = 1000;        // last send time
+#define interval 1000    // interval between sends
 
+
+static const uint32_t GPSBaud = 9600;
+HardwareSerial gpsSerial(1);
+TinyGPSPlus gps;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
-
-JsonDocument data;
-String jsonString;
 
 uint8_t badPacket = 0;
 
 packet RXp;
 packet TXp;
 
-uint8_t spreadFactor = 8;
-uint8_t txPower = 14;
+#define spreadFactor 8
+#define txPower 19
 
 void setup() {
-  Serial.begin(115200);             
+  Serial.begin(115200); 
+  gpsSerial.begin(GPSBaud, SERIAL_8N1, 13, 12);            
   while (!Serial);
   Serial.println("Hello World!");
 
@@ -34,15 +37,14 @@ void setup() {
   LoRa.dumpRegisters(Serial);
 
   
-  init_server();
   init_oled();
   
   TXp.lat = 23.324234;
-  TXp.lon = 43.42564;
+  TXp.lng = 43.42564;
   TXp.alt = 23432;
+  TXp.sats = 0;
   TXp.pcount = 0;
   TXp.state = 0x00;
-  update_clients(&TXp);
 }
 
 
@@ -107,7 +109,7 @@ void init_lora(){
   LoRa.setCodingRate4(5);
   LoRa.setSignalBandwidth(125E3);
   //LoRa.setPreambleLength(6);
-  LoRa.setTxPower(txPower,0);
+  LoRa.setTxPower(txPower,1);
   LoRa.setSpreadingFactor(spreadFactor);
 
 }
@@ -125,35 +127,23 @@ void init_oled(){
 
 
   display.println("Hello World!");
-  display.println("IP: " + WiFi.localIP().toString());
   display.display();
   display.clearDisplay();
 }
 
-void update_clients(packet* p){
-  data["lat"] = String(p->lat);
-  data["lon"] =  String(p->lon);
-  data["alt"] = String(p->alt);
-  data["rssi"] = String(LoRa.rssi());
-  
-  serializeJson(data, jsonString);
-  notifyClients(jsonString);
-}
-
 //1sec
 void slow_loop(){
-    update_clients(&TXp);
 
     TXp.pcount++;
 
-    //Send_packet();
-    //display.clearDisplay();
-    //display.setCursor(0, 0);
-    //display.println("RSSI: " + String(LoRa.rssi()));
-    //display.println("Packet RSSI: " + String(LoRa.packetRssi()));
-    //display.println("Packet Count: " + String(RXp.pcount));
-    //display.println("IP: " + WiFi.localIP().toString());
-    //display.display();
+    Send_packet();
+
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println("RSSI: " + String(LoRa.rssi()));
+    display.println("Packet RSSI: " + String(LoRa.packetRssi()));
+    display.println("Packet Count: " + String(RXp.pcount));
+    display.display();
 
 
     lastSendTime = millis();
@@ -162,10 +152,28 @@ void slow_loop(){
 
 void fast_loop(){
   Recieve_packet(LoRa.parsePacket());
-  int timer = millis();
-  notifyClients(jsonString);
-  Serial.print("TX time: ");
-  Serial.println(millis()-timer);
+  read_gps();
+}
+
+void read_gps(){
+  if(gpsSerial.available() > 0){
+    //Serial.println("gps avalible");
+    if(gps.encode(gpsSerial.read())){
+      Serial.println("gps decoded");
+      if(gps.location.isValid()){
+        digitalWrite(LED_BUILTIN, HIGH);
+        TXp.lat = gps.location.lat();
+        TXp.lng = gps.location.lng();
+        //Serial.println("location valid");
+      }
+      if(gps.altitude.isValid()){
+        TXp.alt = gps.altitude.meters();
+      }
+      if(gps.satellites.isValid()){
+        TXp.sats = gps.satellites.value();
+      }
+    }
+  }
 }
 
 
