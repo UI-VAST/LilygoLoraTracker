@@ -19,12 +19,13 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 
-//state
-//0x00 default state
-//0x01 request cutdown
-//0x02 cutdown recieved
-//0x03 cutdown done
+#define cutdown_servo_pin 4
+#define gps_rx 0
+#define gps_tx 2
 
+#define default_state 0x00
+#define open_servo 0x01
+#define close_servo 0x02
 
 struct packet{
   float lat;
@@ -44,3 +45,5 @@ void init_oled();
 void slow_loop();
 void fast_loop();
 void read_gps();
+void init_servo();
+

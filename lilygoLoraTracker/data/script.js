@@ -1,17 +1,27 @@
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 var dataIndex = 0; // Index to keep track of data points
+
 // Init web socket when the page loads
 window.addEventListener('load', onload);
 
+// Coordinates of the point on the map (latitude, longitude)
+var latitude = 37.7749; // Example latitude
+var longitude = -122.4194; // Example longitude
 
 function onload(event) {
     initWebSocket();
-    initMap();
 }
 
 function sendCutDown(){
-    websocket.send("cd");
+    var userInput = prompt("Type 'yes' to confirm:");
+    if (userInput && userInput.toLowerCase() === 'yes') {
+      // Perform action here
+      websocket.send("cd");
+      alert("Cutdown sent!");
+    } else {
+      alert("Cutdown canceled.");
+    } 
 }
 
 function initWebSocket() {
@@ -43,13 +53,26 @@ function onMessage(event) {
         document.getElementById(key).innerHTML = myObj[key];
     }
 
+    latitude = parseFloat(myObj["lat"]);
+    longitude = parseFloat(myObj["lon"]);
+
+    var button = document.getElementById("cutdown_button");
+    if(myObj["sync"] == "0"){
+        button.style.backgroundColor = "#9c1717";
+    }
+    if(myObj["sync"] == "1"){
+        button.style.backgroundColor = "#4CAF50";
+    }
+
     //console.log(myObj["rssi"]);
     
     addData(rssiChart, dataIndex, parseInt(myObj["rssi"]));
     removeOldData(rssiChart);
 
-    updateMarker(parseFloat(myObj["lat"]), parseFloat(myObj["lng"]));
+    
 }
+
+
 
 
 var rssiData = {
@@ -74,7 +97,7 @@ const rssiChart = new Chart(ctx, {
             data: [],
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
+            borderWidth: 1,
         }]
     },
     options: {
@@ -107,32 +130,22 @@ function removeOldData(chart) {
     }
 }
 
-var marker;
-// Initialize and display the map
-function initMap() {
-    // Specify the coordinates
-    var myLatLng = {lat: 40.7128, lng: -74.0060};
-
-    // Create a map object and specify the DOM element for display.
-    var map = new google.maps.Map(document.getElementById('map'), {
-        center: myLatLng,
-        zoom: 8
-    });
-
-    // Create a marker and set its position.
-    var marker = new google.maps.Marker({
-        map: map,
-        position: myLatLng,
-        title: 'Marker'
-    });
+function openMaps() {
 
 
+    // Generate the URL to open Apple Maps or Google Maps based on the user's platform
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 
-}
+    var mapsUrl;
+    if (isIOS) {
+        // Open Apple Maps on iOS devices
+        var mapsUrl = "maps://maps.apple.com/?q=" + latitude + "," + longitude;
+    } else {
+        // Open Google Maps on other platforms
+        mapsUrl = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+    }
 
-// Function to update marker position
-function updateMarker(lat, lng) {
-    var newLatLng = new google.maps.LatLng(lat, lng);
-    marker.setPosition(newLatLng);
-    map.setCenter(newLatLng);
+    // Open the maps URL
+    window.location.href = mapsUrl;
 }

@@ -17,39 +17,58 @@ body {
 .content {
     padding: 50px;
 }
-.card-grid {
-    max-width: 800px;
-    margin: 0 auto;
-    display: grid;
-    grid-gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-.card {
-    background-color: rgb(255, 255, 255);
-    box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-}
-.card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #034078
-}
+
 .reading {
     font-size: 1.2rem;
     color: #1282A2;
 }
 
-table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-  }
   
-td, th {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
+.telemetry-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
-  
-tr:nth-child(even) {
-    background-color: #dddddd;
+
+.card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Center align content */
+}
+
+.card-title {
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+.data {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align content */
+    gap: 0px; /* Reduce vertical space */
+}
+
+.data p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label {
+    margin-right: 10px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
 }

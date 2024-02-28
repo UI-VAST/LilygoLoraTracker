@@ -18,13 +18,9 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-
-//state
-//0x00 default state
-//0x01 request cutdown
-//0x02 cutdown recieved
-//0x03 cutdown done
-
+#define default_state 0x00
+#define open_servo 0x01
+#define close_servo 0x02
 
 struct packet{
   float lat;
@@ -38,6 +34,7 @@ struct packet{
 
 
 
+
 void Send_packet();
 void Recieve_packet(int len);
 void init_lora();
@@ -45,3 +42,5 @@ void init_oled();
 void update_clients(packet* p);
 void slow_loop();
 void fast_loop();
+void sendMAVLink();
+

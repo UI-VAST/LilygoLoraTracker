@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <ESP32Servo.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>         
 #include <LoRa.h>
@@ -18,26 +19,24 @@ HardwareSerial gpsSerial(1);
 TinyGPSPlus gps;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
-
+Servo myservo;
 uint8_t badPacket = 0;
 
-packet RXp;
 packet TXp;
 
 #define spreadFactor 8
 #define txPower 19
 
 void setup() {
-  Serial.begin(115200); 
-  gpsSerial.begin(GPSBaud, SERIAL_8N1, 13, 12);            
+  Serial.begin(115200);
   while (!Serial);
+  gpsSerial.begin(GPSBaud, SERIAL_8N1, 13, 15);            
   Serial.println("Hello World!");
 
   init_lora();
   LoRa.dumpRegisters(Serial);
-
-  
   init_oled();
+  init_servo();
   
   TXp.lat = 23.324234;
   TXp.lng = 43.42564;
@@ -63,35 +62,27 @@ void Send_packet(){
     LoRa.beginPacket();
     LoRa.write(payload, sizeof(payload));
     LoRa.endPacket();
-    Serial.println((millis()- start));
-    Serial.println("Packet Sent!");
+    Serial.print((millis()- start));
+    Serial.println(" mS Packet Sent!");
 }
 
 void Recieve_packet(int len)
 {
-    if(len == sizeof(RXp)){
-      uint8_t payload[len];
-      LoRa.readBytes(payload, len);
-      memcpy(&RXp, &payload[0], sizeof(TXp));
+  if(len > 0){
+    TXp.state = LoRa.read();
+    Serial.print("Packet Recieved: ");
+    Serial.println(TXp.state);
 
-      Serial.println("Packet Recieved!");
-      
-      /*
-      display.clearDisplay();
-      display.setCursor(0, 0); 
-      display.println("Packet Count: " + String(RXp.pcount));
-      display.println("Packet Len: " + String(len));
-      display.println("Spread Factor: " + String(spreadFactor));
-      display.println("RSSI: " + String(LoRa.packetRssi()));
-      display.println("Snr: " + String(LoRa.packetSnr()));
-      display.println("Bad Packet: " + String(badPacket));
-      display.display();
-      */
-      
+    if(TXp.state == open_servo){
+      myservo.write(180);
+      Serial.println("Opening Servo");
     }
-    else if(len > 0){
-      badPacket++;
+    if(TXp.state == close_servo){
+      myservo.write(0);
+      Serial.println("Closing Servo");
     }
+  }
+
 
 }
 
@@ -142,7 +133,6 @@ void slow_loop(){
     display.setCursor(0, 0);
     display.println("RSSI: " + String(LoRa.rssi()));
     display.println("Packet RSSI: " + String(LoRa.packetRssi()));
-    display.println("Packet Count: " + String(RXp.pcount));
     display.display();
 
 
@@ -159,7 +149,7 @@ void read_gps(){
   if(gpsSerial.available() > 0){
     //Serial.println("gps avalible");
     if(gps.encode(gpsSerial.read())){
-      Serial.println("gps decoded");
+      //Serial.println("gps decoded");
       if(gps.location.isValid()){
         digitalWrite(LED_BUILTIN, HIGH);
         TXp.lat = gps.location.lat();
@@ -175,6 +165,18 @@ void read_gps(){
     }
   }
 }
+
+void init_servo(){
+  // Allow allocation of all timers
+	ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
+	myservo.setPeriodHertz(50);    // standard 50 hz servo
+	myservo.attach(cutdown_servo_pin, 1000, 2000); // attaches the servo on pin 18 to the servo object 
+}
+
+
 
 
 

@@ -10,49 +10,41 @@
             <h1>VAST Ground Station</h1>
         </div>
         <div class="content">
-            <div class="card-grid">
+            <div class="telemetry-container">
                 <div class="card">
-                    <p class="card-title">latitude:</p>
-                    <p id="lat">0.000</p>
+                    <p class="card-title">Location</p>
+                    <div class="data">
+                        <p><span class="label">Lat:</span> <span id="lat">0.000</span></p>
+                        <p><span class="label">Lon:</span> <span id="lon">0.000</span></p>
+                        <p><span class="label">Alt:</span> <span id="alt">0.000</span></p>
+                        <button onclick="openMaps()">Open Map</button>
+                    </div>
                 </div>
                 <div class="card">
-                    <p class="card-title">longitude:</p>
-                    <p id="lon">0.000</p>
+                    <p class="card-title">Signal</p>
+                    <div class="data">
+                        <p><span class="label">RSSI:</span> <span id="rssi">0.000</span></p>
+                        <p><span class="label">SNR:</span> <span id="snr">0.000</span></p>
+                    </div>
                 </div>
                 <div class="card">
-                    <p class="card-title">altitude:</p>
-                    <p id="alt">0.000</p>
+                    <p class="card-title">Satellites</p>
+                    <p><span class="label">Sats:</span> <span id="sats">0.000</span></p>
                 </div>
                 <div class="card">
-                    <p class="card-title">rssi:</p>
-                    <p id="rssi">0.000</p>
+                    <p class="card-title">Packets</p>
+                    <p><span class="label">Packets:</span> <span id="pcount">0.000</span></p>
                 </div>
                 <div class="card">
-                    <p class="card-title">snr:</p>
-                    <p id="snr">0.000</p>
+                    <button id="cutdown_button" onclick="sendCutDown()">Send CutDown</button>
+                    <p class="card-title">Sync</p>
+                    <p></p> <span id="sync">0</span></p>
                 </div>
-                <div class="card">
-                    <p class="card-title">sats:</p>
-                    <p id="sats">0.000</p>
-                </div>
-                <div class="card">
-                    <p class="card-title">packet count:</p>
-                    <p id="pcount">0.000</p>
-                </div>
-                <div class="card">
-                    <button onclick="sendCutDown()">Send CutDown</button>
-                </div>
-
             </div>
         
             <canvas id="rssiChart" width="200" height="100"></canvas>
         </div>
-        <div id="map"></div>
-        
     </body>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="chart.js"></script>
     <script src="script.js"></script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkFiqXNX4pO0JBLPDIkvl0gW-Jwe3420A&callback=initMap">
-    </script>
 </html>

@@ -6,6 +6,12 @@
 #include <LoRa.h>
 #include <main.h>
 #include <websocket.h>
+//#include <common/mavlink.h>
+//#include <AsyncUDP.h>
+
+
+//#include "SimpleUDP.h"
+//#include "SimpleMavlinkDrone.h"
 
 long lastSendTime = 0;
 int count = 1000;        // last send time
@@ -17,13 +23,21 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 JsonDocument data;
 String jsonString;
 
+const int port = 14550;
+
+
+//SimpleMavlinkDrone drone(&udp);
+
+
 uint8_t badPacket = 0;
+bool is_synced = 0;
 
 packet RXp;
-packet TXp;
 
 #define spreadFactor 8
 #define txPower 19
+
+
 
 void setup() {
   Serial.begin(115200);             
@@ -36,12 +50,10 @@ void setup() {
   
   init_server();
   init_oled();
-  
-  TXp.pcount = 0;
-  TXp.state = 0x00;
-  update_clients(&TXp);
-}
 
+  update_clients(&RXp);
+}
+ 
 
 void loop() {
   if (millis() - lastSendTime > count) {
@@ -52,11 +64,12 @@ void loop() {
 }
 
 void Send_packet(){
-    uint8_t payload[sizeof(TXp)];
-    memcpy(&payload[0], &TXp, sizeof(TXp));
+    //uint8_t payload[sizeof(TXp)];
+    //memcpy(&payload[0], &TXp, sizeof(TXp));
     long start = millis();
     LoRa.beginPacket();
-    LoRa.write(payload, sizeof(payload));
+    //LoRa.write(payload, sizeof(payload));
+    LoRa.write(get_state());
     LoRa.endPacket();
     Serial.println((millis()- start));
     Serial.println("Packet Sent!");
@@ -67,7 +80,7 @@ void Recieve_packet(int len)
     if(len == sizeof(RXp)){
       uint8_t payload[len];
       LoRa.readBytes(payload, len);
-      memcpy(&RXp, &payload[0], sizeof(TXp));
+      memcpy(&RXp, &payload[0], sizeof(RXp));
 
       Serial.println("Packet Recieved!");
       
@@ -104,14 +117,14 @@ void init_lora(){
   LoRa.setCodingRate4(5);
   LoRa.setSignalBandwidth(125E3);
   //LoRa.setPreambleLength(6);
-  LoRa.setTxPower(txPower,0);
+  LoRa.setTxPower(txPower,1);
   LoRa.setSpreadingFactor(spreadFactor);
 
 }
 
 void init_oled(){
   if(!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
+    Serial.println("SSD1306 allocation failed");
     for(;;); // Don't proceed, loop forever
   }
   display.clearDisplay();
@@ -135,18 +148,29 @@ void update_clients(packet* p){
   data["pcount"] = String(p->pcount);
   data["rssi"] = String(LoRa.packetRssi());
   data["snr"] = String(LoRa.packetSnr());
-  
+  data["sync"] = String(is_synced);
   serializeJson(data, jsonString);
   notifyClients(jsonString);
 }
 
 //1sec
-void slow_loop(){
+void slow_loop(){   
+     
+    if(RXp.state != get_state()){
+      //sync states between boards
+      is_synced = 0;
+      Serial.println("Syncing states");
+      Send_packet();
+    }
+    else{
+      is_synced = 1;
+      Serial.println("boards are synced!");
+    }
+
     update_clients(&RXp);
+    
+    
 
-    TXp.pcount++;
-
-    //Send_packet();
     //display.clearDisplay();
     //display.setCursor(0, 0);
     //display.println("RSSI: " + String(LoRa.rssi()));
@@ -162,6 +186,8 @@ void slow_loop(){
 
 void fast_loop(){
   Recieve_packet(LoRa.parsePacket());
+  
+  //drone.loop();
 }
 
 

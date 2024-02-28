@@ -1,12 +1,15 @@
 #include <Arduino.h>
 #include <websocket.h>
-
+#include <main.h>
 //ground staiton
+
+#define wifi_station
 
 // Replace with your network credentials
 const char* ssid = "rymste2.4";
 const char* password = "Blue1216?";
 
+uint8_t s_state = close_servo;
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
@@ -27,14 +30,23 @@ void initSPIFFS() {
 
 // Initialize WiFi
 void initWiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi ..");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(1000);
-  }
-  Serial.println(WiFi.localIP().toString());
+
+  #ifdef wifi_station
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP("vast_tracker", "vast1234");
+    Serial.println(WiFi.softAPBroadcastIP().toString());
+  #else
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to WiFi ..");
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.print('.');
+      delay(1000);
+    }
+    Serial.println(WiFi.localIP());
+  #endif
+  
+
 }
 
 void notifyClients(String data) {
@@ -44,16 +56,23 @@ void notifyClients(String data) {
   }
   
 }
-
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
     String message = (char*)data;
-    //Check if the message is "getReadings"
     if (strcmp((char*)data, "cd") == 0) {
       //if it is, send current sensor readings
       Serial.println("Cutdown recieved!");
+      if(s_state == open_servo){
+        s_state = close_servo;
+        return;
+      }
+      if(s_state == close_servo){
+        s_state = open_servo;
+        return;
+      }
+      
       //notifyClients(sensorReadings);
     }
   }
@@ -99,17 +118,10 @@ void init_server() {
 
 }
 
-/*
-void loop() {
-  if ((millis() - lastTime) > timerDelay) {
-    String sensorReadings = getSensorReadings();
-    Serial.print(sensorReadings);
-    notifyClients(sensorReadings);
-
-  lastTime = millis();
-
-  }
-
-  ws.cleanupClients();
+uint8_t get_state(){
+  return s_state;
 }
-*/
+
+void set_state(uint8_t s){
+  s_state = s;
+}
