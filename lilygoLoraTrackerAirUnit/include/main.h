@@ -20,8 +20,15 @@
 
 
 #define cutdown_servo_pin 4
-#define gps_rx 0
-#define gps_tx 2
+
+#define GPSBaud 9600
+#define lora2Baud 9600
+
+#define gps_rx 13
+#define gps_tx 15
+
+#define lora2_rx 0
+#define lora2_tx 0
 
 #define default_state 0x00
 #define open_servo 0x01

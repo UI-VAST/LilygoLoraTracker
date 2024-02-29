@@ -8,14 +8,14 @@
 #include <main.h>
 #include <TinyGPSPlus.h>
 #include <HardwareSerial.h>
+#include <PacketSerial.h>
 
 long lastSendTime = 0;
 int count = 1000;        // last send time
 #define interval 1000    // interval between sends
 
-
-static const uint32_t GPSBaud = 9600;
 HardwareSerial gpsSerial(1);
+HardwareSerial lora2(2);
 TinyGPSPlus gps;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
@@ -30,8 +30,11 @@ packet TXp;
 void setup() {
   Serial.begin(115200);
   while (!Serial);
-  gpsSerial.begin(GPSBaud, SERIAL_8N1, 13, 15);            
   Serial.println("Hello World!");
+
+  gpsSerial.begin(GPSBaud, SERIAL_8N1, gps_rx, gps_tx);
+  lora2.begin(lora2Baud, SERIAL_8N1, lora2_rx, lora2_tx);           
+  
 
   init_lora();
   LoRa.dumpRegisters(Serial);
@@ -56,14 +59,24 @@ void loop() {
 }
 
 void Send_packet(){
+    //load the packet into a byte array
     uint8_t payload[sizeof(TXp)];
     memcpy(&payload[0], &TXp, sizeof(TXp));
+
+    //TX on the 915MHz lora
     long start = millis();
     LoRa.beginPacket();
     LoRa.write(payload, sizeof(payload));
     LoRa.endPacket();
     Serial.print((millis()- start));
-    Serial.println(" mS Packet Sent!");
+    Serial.println(" mS 915!");
+
+    //TX on the 433MHz lora
+    start = millis();
+    lora2.write(payload, sizeof(payload));
+    Serial.print((millis()- start));
+    Serial.println(" mS 433!");
+    
 }
 
 void Recieve_packet(int len)
@@ -84,6 +97,25 @@ void Recieve_packet(int len)
   }
 
 
+}
+
+void Read_lora2(){
+  if(lora2.available()){
+
+    TXp.state = lora2.read();
+    Serial.print("Packet Recieved: ");
+    Serial.println(TXp.state);
+
+    if(TXp.state == open_servo){
+      myservo.write(180);
+      Serial.println("Opening Servo");
+    }
+    if(TXp.state == close_servo){
+      myservo.write(0);
+      Serial.println("Closing Servo");
+    }
+    
+  }
 }
 
 void init_lora(){
@@ -143,6 +175,7 @@ void slow_loop(){
 void fast_loop(){
   Recieve_packet(LoRa.parsePacket());
   read_gps();
+
 }
 
 void read_gps(){
