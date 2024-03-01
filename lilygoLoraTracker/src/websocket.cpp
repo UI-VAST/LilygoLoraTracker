@@ -3,7 +3,7 @@
 #include <main.h>
 //ground staiton
 
-#define wifi_station
+//#define wifi_station
 
 // Replace with your network credentials
 const char* ssid = "rymste2.4";

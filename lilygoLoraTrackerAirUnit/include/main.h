@@ -19,16 +19,32 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 
-#define cutdown_servo_pin 4
 
+/*
+34
+35
+12
+13
+14
+15
+0
+4
+*/
 #define GPSBaud 9600
-#define lora2Baud 9600
+#define ebyteBaud 9600
+
+#define cutdown_servo_pin 4
 
 #define gps_rx 13
 #define gps_tx 15
 
-#define lora2_rx 0
-#define lora2_tx 0
+#define ebyte_rx 12
+#define ebyte_tx 14
+#define ebyte_m1 25
+#define ebyte_m0 0
+#define ebyte_aux 35
+
+#define E32_TTL_1W
 
 #define default_state 0x00
 #define open_servo 0x01
@@ -44,7 +60,6 @@ struct packet{
 };
 
 
-
 void Send_packet();
 void Recieve_packet(int len);
 void init_lora();
@@ -54,3 +69,6 @@ void fast_loop();
 void read_gps();
 void init_servo();
 
+void init_ebyte();
+void printModuleInformation(struct ModuleInformation moduleInformation);
+void printParameters(struct Configuration configuration);

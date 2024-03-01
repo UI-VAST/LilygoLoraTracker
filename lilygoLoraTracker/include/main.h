@@ -15,6 +15,14 @@
 #define SDCARD_SCLK 14
 #define SDCARD_CS   13
 
+#define ebyte_rx 12
+#define ebyte_tx 14
+#define ebyte_m1 2
+#define ebyte_m0 0
+#define ebyte_aux 35
+
+#define E32_TTL_1W
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
@@ -39,8 +47,12 @@ void Send_packet();
 void Recieve_packet(int len);
 void init_lora();
 void init_oled();
-void update_clients(packet* p);
+void update_clients(packet* p, packet* p2);
 void slow_loop();
 void fast_loop();
-void sendMAVLink();
+void Recieve_ebyte();
+
+void init_ebyte();
+void printModuleInformation(struct ModuleInformation moduleInformation);
+void printParameters(struct Configuration configuration);
 
