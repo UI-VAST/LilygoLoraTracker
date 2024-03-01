@@ -14,10 +14,10 @@
                 <div class="card">
                     <p class="card-title">Location</p>
                     <div class="data">
-                        <p><span class="label">Lat:</span><span id="lat">0.000</span></p>
-                        <p><span class="label">Lon:</span><span id="lon">0.000</span></p>
-                        <p><span class="label">Alt:</span><span id="alt">0.000</span></p>
-                        <button onclick="openMaps()">Open Map</button>
+                        <p><span id="lat">0.000</span>  <span class="label">:Lat:</span>   <span id="lat2">0.000</span></p>
+                        <p><span id="lon">0.000</span>  <span class="label">:Lon:</span>   <span id="lon2">0.000</span></p>
+                        <p><span id="alt">0.000</span>  <span class="label">:Alt:</span>   <span id="alt2">0.000</span></p>
+                        <span><button onclick="openMaps()">Open Map</button> <button onclick="openMaps()">Open Map2</button></span>
                         
                     </div>
                 </div>
@@ -30,11 +30,16 @@
                 </div>
                 <div class="card">
                     <p class="card-title">Satellites</p>
-                    <p><span class="label">Sats:</span><span id="sats">0.000</span></p>
+                    <p><span id="sats">0.000</span>  <span class="label">:Sats:</span>  <span id="sats2">0.000</span></p>
                 </div>
                 <div class="card">
                     <p class="card-title">Packets</p>
-                    <p><span class="label">Packets:</span><span id="pcount">0.000</span></p>
+                    <p><span id="pcount">0.000</span>  <span class="label">:Packets:</span>  <span id="pcount2">0.000</span></p>
+                </div>
+                <div class="card">
+                    <button id="cutdown_button" onclick="sendCutDown()">Send CutDown</button>
+                    <p class="card-title">Sync</p>
+                    <p></p> <span id="sync">0</span></p>
                 </div>
             </div>
         

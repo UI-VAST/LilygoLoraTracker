@@ -3,11 +3,11 @@
 #include <main.h>
 //ground staiton
 
-#define wifi_station
+//#define wifi_station
 
 // Replace with your network credentials
-const char* ssid = "your wifi ssid";
-const char* password = "your wifi password";
+const char* ssid = "rymste2.4";
+const char* password = "Blue1216?";
 
 uint8_t s_state = close_servo;
 // Create AsyncWebServer object on port 80
@@ -33,13 +33,7 @@ void initWiFi() {
 
   #ifdef wifi_station
     WiFi.mode(WIFI_AP);
-  
-    uint8_t mac[8];
-    esp_efuse_mac_get_default(mac);
-    uint8_t id = (mac[7]+mac[6]+mac[5]+mac[4]+mac[3]+mac[2]+mac[1]+mac[0]);
-
-    String ssid ="vast_tracker" + String(id);
-    WiFi.softAP(ssid, "vast1234");
+    WiFi.softAP("vast_tracker", "vast1234");
     Serial.println(WiFi.softAPBroadcastIP().toString());
   #else
     WiFi.mode(WIFI_STA);

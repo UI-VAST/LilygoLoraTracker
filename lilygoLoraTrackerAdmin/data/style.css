@@ -1,0 +1,75 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    display: inline-block;
+    text-align: center;
+}
+h1 {
+    font-size: 1.8rem;
+    color: white;
+}
+.topnav {
+    overflow: hidden;
+    background-color: #0A1128;
+}
+body {
+    margin: 0;
+}
+.content {
+    padding: 50px;
+}
+
+.reading {
+    font-size: 1.2rem;
+    color: #1282A2;
+}
+
+  
+.telemetry-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Center align content */
+}
+
+.card-title {
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+.data {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align content */
+    gap: 0px; /* Reduce vertical space */
+}
+
+.data p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}

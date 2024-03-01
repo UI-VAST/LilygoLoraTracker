@@ -8,12 +8,23 @@ window.addEventListener('load', onload);
 // Coordinates of the point on the map (latitude, longitude)
 var latitude = 37.7749; // Example latitude
 var longitude = -122.4194; // Example longitude
-
+var latitude2 = 37.7749; // Example latitude
+var longitude2 = -122.4194; // Example longitude
 
 function onload(event) {
     initWebSocket();
 }
 
+function sendCutDown(){
+    var userInput = prompt("Type 'yes' to confirm:");
+    if (userInput && userInput.toLowerCase() === 'yes') {
+      // Perform action here
+      websocket.send("cd");
+      alert("Cutdown sent!");
+    } else {
+      alert("Cutdown canceled.");
+    } 
+}
 
 function initWebSocket() {
     console.log('Trying to open a WebSocket connection…');
@@ -46,6 +57,16 @@ function onMessage(event) {
 
     latitude = parseFloat(myObj["lat"]);
     longitude = parseFloat(myObj["lon"]);
+    latitude2 = parseFloat(myObj["lat2"]);
+    longitude2 = parseFloat(myObj["lon2"]);
+
+    var button = document.getElementById("cutdown_button");
+    if(myObj["sync"] == "0"){
+        button.style.backgroundColor = "#9c1717";
+    }
+    if(myObj["sync"] == "1"){
+        button.style.backgroundColor = "#4CAF50";
+    }
 
     //console.log(myObj["rssi"]);
     
@@ -124,6 +145,26 @@ function openMaps() {
     if (isIOS) {
         // Open Apple Maps on iOS devices
         var mapsUrl = "maps://maps.apple.com/?q=" + latitude + "," + longitude;
+    } else {
+        // Open Google Maps on other platforms
+        mapsUrl = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+    }
+
+    // Open the maps URL
+    window.location.href = mapsUrl;
+}
+
+function openMaps2() {
+
+
+    // Generate the URL to open Apple Maps or Google Maps based on the user's platform
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+    var mapsUrl;
+    if (isIOS) {
+        // Open Apple Maps on iOS devices
+        var mapsUrl = "maps://maps.apple.com/?q=" + latitude2 + "," + longitude2;
     } else {
         // Open Google Maps on other platforms
         mapsUrl = "https://www.google.com/maps?q=" + latitude + "," + longitude;
