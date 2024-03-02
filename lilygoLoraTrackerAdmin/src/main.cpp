@@ -8,9 +8,8 @@
 #include <websocket.h>
 #include <HardwareSerial.h>
 #include "LoRa_E32.h"
-
-//#include <common/mavlink.h>
-//#include <AsyncUDP.h>
+#include <mav.h>
+#include <AsyncUDP.h>
 
 
 
@@ -25,10 +24,11 @@ HardwareSerial ebyteSerial(1);
 LoRa_E32 e32(ebyte_tx, ebyte_rx, &ebyteSerial, ebyte_aux, ebyte_m0, ebyte_m1, UART_BPS_RATE_9600, SERIAL_8N1);
 
 
+
 JsonDocument data;
 String jsonString;
 
-const int port = 14550;
+
 
 
 //SimpleMavlinkDrone drone(&udp);
@@ -57,7 +57,7 @@ void setup() {
   init_server();
   init_oled();
   init_ebyte();
-
+  init_mav();
   update_clients(&RXp, &RXp2);
 }
  
@@ -202,8 +202,6 @@ void slow_loop(){
     
     update_clients(&RXp, &RXp2);
 
-  
-    
     //display.clearDisplay();
     //display.setCursor(0, 0);
     //display.println("RSSI: " + String(LoRa.rssi()));
@@ -212,6 +210,8 @@ void slow_loop(){
     //display.println("IP: " + WiFi.localIP().toString());
     //display.display();
 
+    mav_slow_loop();
+    send_mavlink(RXp.lat, RXp.lon, RXp.alt, RXp.sats);
     lastSendTime = millis();
 }
 
@@ -221,7 +221,7 @@ void slow_loop(){
 void fast_loop(){
   Recieve_packet(LoRa.parsePacket());
   Recieve_ebyte();
- 
+  mav_fast_loop();
 }
 
 void init_ebyte(){
@@ -246,21 +246,21 @@ void init_ebyte(){
 void printParameters(struct Configuration configuration) {
 	Serial.println("----------------------------------------");
 
-	Serial.print(F("HEAD : "));  Serial.print(configuration.HEAD, BIN);Serial.print(" ");Serial.print(configuration.HEAD, DEC);Serial.print(" ");Serial.println(configuration.HEAD, HEX);
-	Serial.println(F(" "));
-	Serial.print(F("AddH : "));  Serial.println(configuration.ADDH, DEC);
-	Serial.print(F("AddL : "));  Serial.println(configuration.ADDL, DEC);
-	Serial.print(F("Chan : "));  Serial.print(configuration.CHAN, DEC); Serial.print(" -> "); Serial.println(configuration.getChannelDescription());
-	Serial.println(F(" "));
-	Serial.print(F("SpeedParityBit     : "));  Serial.print(configuration.SPED.uartParity, BIN);Serial.print(" -> "); Serial.println(configuration.SPED.getUARTParityDescription());
-	Serial.print(F("SpeedUARTDatte  : "));  Serial.print(configuration.SPED.uartBaudRate, BIN);Serial.print(" -> "); Serial.println(configuration.SPED.getUARTBaudRate());
-	Serial.print(F("SpeedAirDataRate   : "));  Serial.print(configuration.SPED.airDataRate, BIN);Serial.print(" -> "); Serial.println(configuration.SPED.getAirDataRate());
+	Serial.print(("HEAD : "));  Serial.print(configuration.HEAD, BIN);Serial.print(" ");Serial.print(configuration.HEAD, DEC);Serial.print(" ");Serial.println(configuration.HEAD, HEX);
+	Serial.println((" "));
+	Serial.print(("AddH : "));  Serial.println(configuration.ADDH, DEC);
+	Serial.print(("AddL : "));  Serial.println(configuration.ADDL, DEC);
+	Serial.print(("Chan : "));  Serial.print(configuration.CHAN, DEC); Serial.print(" -> "); Serial.println(configuration.getChannelDescription());
+	Serial.println((" "));
+	Serial.print(("SpeedParityBit     : "));  Serial.print(configuration.SPED.uartParity, BIN);Serial.print(" -> "); Serial.println(configuration.SPED.getUARTParityDescription());
+	Serial.print(("SpeedUARTDatte  : "));  Serial.print(configuration.SPED.uartBaudRate, BIN);Serial.print(" -> "); Serial.println(configuration.SPED.getUARTBaudRate());
+	Serial.print(("SpeedAirDataRate   : "));  Serial.print(configuration.SPED.airDataRate, BIN);Serial.print(" -> "); Serial.println(configuration.SPED.getAirDataRate());
 
-	Serial.print(F("OptionTrans        : "));  Serial.print(configuration.OPTION.fixedTransmission, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getFixedTransmissionDescription());
-	Serial.print(F("OptionPullup       : "));  Serial.print(configuration.OPTION.ioDriveMode, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getIODroveModeDescription());
-	Serial.print(F("OptionWakeup       : "));  Serial.print(configuration.OPTION.wirelessWakeupTime, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getWirelessWakeUPTimeDescription());
-	Serial.print(F("OptionFEC          : "));  Serial.print(configuration.OPTION.fec, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getFECDescription());
-	Serial.print(F("OptionPower        : "));  Serial.print(configuration.OPTION.transmissionPower, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getTransmissionPowerDescription());
+	Serial.print(("OptionTrans        : "));  Serial.print(configuration.OPTION.fixedTransmission, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getFixedTransmissionDescription());
+	Serial.print(("OptionPullup       : "));  Serial.print(configuration.OPTION.ioDriveMode, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getIODroveModeDescription());
+	Serial.print(("OptionWakeup       : "));  Serial.print(configuration.OPTION.wirelessWakeupTime, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getWirelessWakeUPTimeDescription());
+	Serial.print(("OptionFEC          : "));  Serial.print(configuration.OPTION.fec, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getFECDescription());
+	Serial.print(("OptionPower        : "));  Serial.print(configuration.OPTION.transmissionPower, BIN);Serial.print(" -> "); Serial.println(configuration.OPTION.getTransmissionPowerDescription());
 
 	Serial.println("----------------------------------------");
 
@@ -268,11 +268,11 @@ void printParameters(struct Configuration configuration) {
 
 void printModuleInformation(struct ModuleInformation moduleInformation) {
 	Serial.println("----------------------------------------");
-	Serial.print(F("HEAD BIN: "));  Serial.print(moduleInformation.HEAD, BIN);Serial.print(" ");Serial.print(moduleInformation.HEAD, DEC);Serial.print(" ");Serial.println(moduleInformation.HEAD, HEX);
+	Serial.print(("HEAD BIN: "));  Serial.print(moduleInformation.HEAD, BIN);Serial.print(" ");Serial.print(moduleInformation.HEAD, DEC);Serial.print(" ");Serial.println(moduleInformation.HEAD, HEX);
 
-	Serial.print(F("Freq.: "));  Serial.println(moduleInformation.frequency, HEX);
-	Serial.print(F("Version  : "));  Serial.println(moduleInformation.version, HEX);
-	Serial.print(F("Features : "));  Serial.println(moduleInformation.features, HEX);
+	Serial.print(("Freq.: "));  Serial.println(moduleInformation.frequency, HEX);
+	Serial.print(("Version  : "));  Serial.println(moduleInformation.version, HEX);
+	Serial.print(("Features : "));  Serial.println(moduleInformation.features, HEX);
 	Serial.println("----------------------------------------");
 
 }
